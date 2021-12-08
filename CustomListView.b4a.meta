@@ -1,12 +1,12 @@
 ﻿ModuleBookmarks0=
 ModuleBookmarks1=
 ModuleBookmarks2=
-ModuleBreakpoints0=552,509,661,815,801
+ModuleBreakpoints0=552,509,661
 ModuleBreakpoints1=
 ModuleBreakpoints2=
 ModuleClosedNodes0=
 ModuleClosedNodes1=
 ModuleClosedNodes2=
-NavigationStack=Main,getBitmap,143,6,Main,Activity_Create,56,6,Main,EventHandler,368,2,Main,ExchangedHandler,608,1,Main,FillListView,845,0,Main,EquipFooterPanel,896,3,Main,EquipHeaderPanel,870,6,Main,clv1_ItemLongClick,777,0,Main,FindNextHeadIndex,641,0,Main,clv1_VisibleRangeChanged,798,6
+NavigationStack=Main,clv1_ItemLongClick,777,0,Main,FindNextHeadIndex,641,0,Main,Globals,24,0,Main,Process_Globals,14,0,Main,getBitmap,143,0,Main,addItem_click,158,0,Main,EquipFooterPanel,905,4,Main,EquipHeaderPanel,894,6,Main,EquipItemPanel,872,0,Main,clv1_VisibleRangeChanged,800,6
 SelectedBuild=0
 VisibleModules=1,2

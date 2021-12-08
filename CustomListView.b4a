@@ -1,18 +1,16 @@
 ﻿Build1=Default,hk.b4a.customlistview.headerfooter
-File1=collapsed.png
-File10=sectionfooter.png
-File11=sectionheader.png
+File1=collapsed2.png
+File10=sectionheader.png
 File2=content.json
 File3=content2.json
 File4=EditHead.bal
 File5=EditLine.bal
 File6=ExchangeLine.bal
-File7=head2.png
-File8=InputBox.bal
-File9=main.bal
+File7=InputBox.bal
+File8=main.bal
+File9=sectionfooter.png
 FileGroup1=Default Group
 FileGroup10=Default Group
-FileGroup11=Default Group
 FileGroup2=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
@@ -33,7 +31,7 @@ Library8=byteconverter
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: http://www.basic4ppc.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="14"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~
 Module1=clsMapOfList
 Module2=modCommon
-NumberOfFiles=11
+NumberOfFiles=10
 NumberOfLibraries=8
 NumberOfModules=2
 Version=11
@@ -178,7 +176,7 @@ Private Sub getBitmap(whichtype As String) As B4XBitmap
 		Return LoadBitmap(File.DirAssets, "sectionfooter.png")		
 	End If
 	If whichtype.ToUpperCase = "C" Then
-		Return LoadBitmap(File.DirAssets, "collapsed.png")
+		Return LoadBitmap(File.DirAssets, "collapsed2.png")
 	End If
 	Return Null
 End Sub
@@ -394,7 +392,7 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 					Return
 				End If
 				Dim pnlHead As B4XView = xui.CreatePanel("")
-				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead.SetBitmap(bmHeader)
 				pnlHead.Tag = "Header"
@@ -404,7 +402,7 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				pnlLine.Tag = "Line"
 				clv1.Add(pnlLine, $"L_${headid}_${lineid}"$)				
 				Dim pnlFoot As B4XView = xui.CreatePanel("")
-				pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlFoot.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
 				pnlFoot.SetBitmap(bmFooter)
 				pnlFoot.Tag = "Footer"
@@ -445,11 +443,11 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				ExchangedHandler(mapRes)
 			Case "headedited"
 				Dim pnlHead As B4XView = xui.CreatePanel("")
-				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead.SetBitmap(bmHeader)
 				pnlHead.Tag = "Header"
-				clv1.ReplaceAt(uiindex, pnlHead, 35dip, "H_" & headid)
+				clv1.ReplaceAt(uiindex, pnlHead, 45dip, "H_" & headid)
 				clv1.Refresh
 			Case "lineedited"
 				Dim pnlLine_2 As B4XView = xui.CreatePanel("")
@@ -468,15 +466,15 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				Next				
 				'refresh the head
 				Dim pnlHead_1 As B4XView = xui.CreatePanel("")
-				pnlHead_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead_1.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead_1.SetBitmap(bmHeader)
 				pnlHead_1.Tag = "Header"
-				clv1.ReplaceAt(uiindex, pnlHead_1, 35dip, "H_" & headid)
+				clv1.ReplaceAt(uiindex, pnlHead_1, 45dip, "H_" & headid)
 				clv1.Refresh
 			Case "expanded"
 				' show the foot
-				clv1.ResizeItem(uiindex + count + 1, 35dip)
+				clv1.ResizeItem(uiindex + count + 1, 45dip)
 				' show lines
 				Dim j As Int = 0
 				For j = 0 To count -1
@@ -484,11 +482,11 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				Next				
 				'refresh the head
 				Dim pnlHead_2 As B4XView = xui.CreatePanel("")
-				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead_2.SetBitmap(bmHeader)
 				pnlHead_2.Tag = "Header"
-				clv1.ReplaceAt(uiindex, pnlHead_2, 35dip, "H_" & headid)
+				clv1.ReplaceAt(uiindex, pnlHead_2, 45dip, "H_" & headid)
 				clv1.Refresh
 		End Select
 	Catch
@@ -595,7 +593,7 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 				clv1.JumpToItem(nextheadid_1)
 			Case 2 ' insert, transfer out
 				Dim pnlHead_2 As B4XView = xui.CreatePanel("")
-				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead_2.SetBitmap(bmHeader)
 				pnlHead_2.Tag = "Header"
@@ -612,7 +610,7 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 				pnlLine_2.Tag = "Line"				
 				clv1.Add(pnlLine_2, value_2)				
 				Dim pnlFoot_2 As B4XView = xui.CreatePanel("")
-				pnlFoot_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlFoot_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlFoot_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
 				pnlFoot_2.SetBitmap(bmFooter)
 				pnlFoot_2.Tag = "Footer"
@@ -627,7 +625,7 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 				clv1.JumpToItem(clv1.Size-1)
 			Case 3 ' insert, delete
 				Dim pnlHead_3 As B4XView = xui.CreatePanel("")
-				pnlHead_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlHead_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlHead_3.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 				'pnlHead_3.SetBitmap(bmHeader)
 				pnlHead_3.Tag = "Header"
@@ -644,7 +642,7 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 				pnlLine_3.Tag = "Line"				
 				clv1.Add(pnlLine_3, value_3)				
 				Dim pnlFoot_3 As B4XView = xui.CreatePanel("")
-				pnlFoot_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+				pnlFoot_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 				'pnlFoot_3.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
 				pnlFoot_3.SetBitmap(bmFooter)
 				pnlFoot_3.Tag = "Footer"
@@ -875,7 +873,7 @@ Sub FillListView()
 			Continue
 		End If
 		Dim pnlHead As B4XView = xui.CreatePanel("")
-		pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+		pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 		'pnlHead.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
 		'pnlHead.SetBitmap(bmHeader)
 		pnlHead.Tag = "Header"
@@ -887,7 +885,7 @@ Sub FillListView()
 			clv1.Add(pnlLine, $"L_${key_1}_${entry_1}"$)
 		Next
 		Dim pnlFoot As B4XView = xui.CreatePanel("")
-		pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 35dip)
+		pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
 		'pnlFoot.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
 		'pnlFoot.SetBitmap(bmFooter)
 		pnlFoot.Tag = "Footer"
@@ -910,7 +908,7 @@ Sub EquipItemPanel(pItem As Panel, Text As String, Text2 As String, Height As In
 	lbl2.TextSize = 16
 	lbl2.TextColor = Colors.Black
 	lbl2.Text = Text2	
-	pItem.AddView(lbl, 5dip, 2dip, 150dip, Height - 4dip) 'view #0
+	pItem.AddView(lbl, 15dip, 2dip, 150dip, Height - 4dip) 'view #0
 	pItem.AddView(lbl2, 280dip, 2dip, 50dip, Height - 4dip) 'view #2
 End Sub
 ' Pass panel as Reference
@@ -933,8 +931,8 @@ Sub EquipHeaderPanel(pHeader As B4XView, Text As String, isExpanded As Boolean)
 		lbl1.Text = modCommon.UTS(0x1F53B) ' v
 		pHeader.SetBitmap(bmCollapsed)
 	End If
-	pHeader.AddView(lbl, 5dip, 2dip, 320dip, 35dip)
-	pHeader.AddView(lbl1, 280dip, 2dip, 20dip, 35dip)
+	pHeader.AddView(lbl, 5dip, 2dip, 320dip, 45dip)
+	pHeader.AddView(lbl1, 280dip, 2dip, 20dip, 45dip)
 End Sub
 ' Pass panel as Reference
 Sub EquipFooterPanel(pFooter As B4XView, Text As String) 
@@ -942,15 +940,15 @@ Sub EquipFooterPanel(pFooter As B4XView, Text As String)
 	pFooter.Color = Colors.Gray
 	pFooter.SetBitmap(bmFooter)
 	Dim lbl As Label : lbl.Initialize("")
-	lbl.Gravity = Bit.Or(Gravity.CENTER_VERTICAL, Gravity.CENTER_HORIZONTAL)
+	lbl.Gravity = Bit.Or(Gravity.TOP, Gravity.CENTER_HORIZONTAL)
 	lbl.Text = Text
 	lbl.TextSize = 16
 	lbl.Typeface = Typeface.DEFAULT_BOLD
 	lbl.TextColor = Colors.White	
 	Dim lbl1 As Label : lbl1.Initialize("")
 	lbl1.Gravity = Bit.Or(Gravity.CENTER_VERTICAL, Gravity.RIGHT)
-	pFooter.AddView(lbl, 5dip, 2dip, 320dip, 35dip)
-	pFooter.AddView(lbl1, 280dip, 2dip, 20dip, 35dip)
+	pFooter.AddView(lbl, 5dip, 2dip, 320dip, 45dip)
+	pFooter.AddView(lbl1, 280dip, 2dip, 20dip, 45dip)
 End Sub
 
 Private Sub sprHead_ItemClick (Position As Int, Value As Object)
