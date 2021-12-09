@@ -42,6 +42,8 @@ Version=11
 	#ApplicationLabel: CLV Header Footer Example
 	#VersionCode: 1
 	#CanInstallToExternalStorage: False
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: portrait
 #End Region
 
 'Activity module
@@ -82,6 +84,8 @@ Sub Activity_Create(FirstTime As Boolean)
 	Activity.AddMenuItem("LogMapHeader", "logmapheader")
 	Activity.AddMenuItem("LogMapLine", "logmapline")
 	Activity.AddMenuItem("LogMapShow", "logmapshow")
+	Activity.AddMenuItem("LogMapSum", "logmapsum")
+	Activity.AddMenuItem("LogMapCount", "logmapcount")
 	Activity.AddMenuItem("resetbitmap", "resetbitmap")
 	Activity.AddMenuItem("back", "back")
 	
@@ -134,6 +138,14 @@ End Sub
 
 Private Sub logmapshow_click
 	objMapOfList.LogStructure("mapshow", objMapOfList.mapShow)
+End Sub
+
+Private Sub logmapsum_click
+	objMapOfList.LogStructure("mapsum", objMapOfList.mapSum)
+End Sub
+
+Private Sub logmapcount_click
+	objMapOfList.LogStructure("mapcount", objMapOfList.mapCount)
 End Sub
 
 Private Sub reset_click
@@ -384,6 +396,14 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				clv1.Refresh
 			Case "linedeleted"
 				LogColor(clv1.GetValue(uiindex), Colors.Blue)
+				Dim pnlFoot As B4XView = xui.CreatePanel("")
+				pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot.Tag = "Footer"
+				Dim footidx As Int = FindCurrFootIndex(headid)
+				If footidx = -1 Then ' impossible for block without footer
+					Return
+				End If				
+				clv1.ReplaceAt(footidx, pnlFoot, 45dip, "F_" & headid)				
 				LogIfIndexOutOfBound(316, uiindex)
 				clv1.RemoveAt(uiindex)
 				clv1.Refresh
@@ -393,8 +413,6 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				End If
 				Dim pnlHead As B4XView = xui.CreatePanel("")
 				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead.SetBitmap(bmHeader)
 				pnlHead.Tag = "Header"
 				clv1.Add(pnlHead, "H_" & headid)
 				Dim pnlLine As B4XView = xui.CreatePanel("")
@@ -403,7 +421,6 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				clv1.Add(pnlLine, $"L_${headid}_${lineid}"$)				
 				Dim pnlFoot As B4XView = xui.CreatePanel("")
 				pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlFoot.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
 				pnlFoot.SetBitmap(bmFooter)
 				pnlFoot.Tag = "Footer"
 				clv1.Add(pnlFoot, "F_" & headid)				
@@ -418,25 +435,31 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				Dim pnlLine_1 As B4XView = xui.CreatePanel("")
 				pnlLine_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
 				pnlLine_1.Tag = "Line"
-				Dim nextheadid As Int = FindNextHeadIndex(headid)
-				If nextheadid = -1 Or nextheadid = clv1.Size Then
-					' No next head
-					clv1.Add(pnlLine_1, $"L_${headid}_${lineid}"$)
-					timer.Enabled = True
-					Wait For timer_tick
-					timer.Enabled = False
-					clv1.JumpToItem(clv1.Size-1)
-				Else
-					LogIfIndexOutOfBound(357, nextheadid)
-					clv1.InsertAt(nextheadid, pnlLine_1, $"L_${headid}_${lineid}"$)
-					timer.Enabled = True
-					Wait For timer_tick
-					timer.Enabled = False
-					If nextheadid = clv1.Size Then
-						nextheadid = clv1.Size -1
-					End If
-					clv1.JumpToItem(nextheadid)
+				Dim pnlFoot_1 As B4XView = xui.CreatePanel("")
+				pnlFoot_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot_1.Tag = "Footer"
+				Dim currFootid As Int = FindCurrFootIndex(headid)
+				If currFootid = -1 Then
+					' impossible for block without footer
+					Return
 				End If
+'				If nextheadid = -1 Or nextheadid = clv1.Size Then
+'					' No next head
+'					clv1.Add(pnlLine_1, $"L_${headid}_${lineid}"$)					
+'					clv1.ReplaceAt(clv1.Size-1, pnlFoot_1, 45dip, "F_" & headid)					
+'					timer.Enabled = True
+'					Wait For timer_tick
+'					timer.Enabled = False
+'					clv1.JumpToItem(clv1.Size-1)
+'				Else
+					LogIfIndexOutOfBound(357, currFootid)
+					clv1.InsertAt(currFootid, pnlLine_1, $"L_${headid}_${lineid}"$)
+					clv1.ReplaceAt(currFootid+1, pnlFoot_1, 45dip, "F_" & headid)					
+					timer.Enabled = True
+					Wait For timer_tick
+					timer.Enabled = False					
+					clv1.JumpToItem(currFootid)
+'				End If
 				clv1.Refresh
 			Case "exchanged"
 				'Dim pnltmp As B4XView = clv1.GetPanel(uiindex)
@@ -444,8 +467,6 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 			Case "headedited"
 				Dim pnlHead As B4XView = xui.CreatePanel("")
 				pnlHead.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead.SetBitmap(bmHeader)
 				pnlHead.Tag = "Header"
 				clv1.ReplaceAt(uiindex, pnlHead, 45dip, "H_" & headid)
 				clv1.Refresh
@@ -454,11 +475,18 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				pnlLine_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
 				pnlLine_2.Tag = "Line"
 				clv1.ReplaceAt(uiindex, pnlLine_2, 40dip, $"L_${headid}_${lineid}"$)
+				Dim footidx_1 As Int = FindCurrFootIndex(headid)
+				If footidx_1 = -1 Then
+					Return
+				End If
+				Dim pnlFoot_2 As B4XView = xui.CreatePanel("")
+				pnlFoot_2.SetLayoutAnimated(0,0,0,clv1.AsView.Width, 45dip)
+				pnlFoot_2.Tag = "Footer"
+				clv1.ReplaceAt(footidx_1, pnlFoot_2, 45dip, "F_" & headid)
 				clv1.Refresh
 			Case "collapsed"
 				' hide the foot
-				clv1.ResizeItem(uiindex + count + 1, 0dip)
-				
+				clv1.ResizeItem(uiindex + count + 1, 0dip)				
 				' hide lines
 				Dim i As Int = 0
 				For i = 0 To count -1
@@ -467,8 +495,6 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				'refresh the head
 				Dim pnlHead_1 As B4XView = xui.CreatePanel("")
 				pnlHead_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead_1.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead_1.SetBitmap(bmHeader)
 				pnlHead_1.Tag = "Header"
 				clv1.ReplaceAt(uiindex, pnlHead_1, 45dip, "H_" & headid)
 				clv1.Refresh
@@ -483,8 +509,6 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 				'refresh the head
 				Dim pnlHead_2 As B4XView = xui.CreatePanel("")
 				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead_2.SetBitmap(bmHeader)
 				pnlHead_2.Tag = "Header"
 				clv1.ReplaceAt(uiindex, pnlHead_2, 45dip, "H_" & headid)
 				clv1.Refresh
@@ -496,9 +520,14 @@ Private Sub EventHandler(mapRes As Map) 'ignore
 End Sub
 
 Private Sub ExchangedHandler(i_mapRes As Map)
+	'
 	Dim headid As Int = -1
 	If i_mapRes.ContainsKey("headid") Then
 		headid = i_mapRes.Get("headid")
+	End If
+	Dim oheadid As Int = -1
+	If i_mapRes.ContainsKey("oheadid") Then
+		oheadid = i_mapRes.Get("oheadid")
 	End If
 	Dim uiindex As Int = -1
 	If i_mapRes.ContainsKey("uiindex") Then
@@ -515,110 +544,122 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 				If originalLineid = -1 Then
 					Return
 				End If
+				Dim pnlFoot As B4XView = xui.CreatePanel("")
+				pnlFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot.Tag = "Footer"
+				Dim pnlOFoot As B4XView = xui.CreatePanel("")
+				pnlOFoot.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlOFoot.Tag = "Footer"
 				Dim value As String = $"L_${headid}_${originalLineid}"$
-				Dim nextheadid As Int = FindNextHeadIndex(headid)
-				If nextheadid = -1 Or nextheadid = clv1.Size Then
-					'No next head
-					clv1.Add(pnlLine, value)
-					LogIfIndexOutOfBound(446, uiindex)
+				Dim prevFootId As Int = FindCurrFootIndex(oheadid)
+				Dim currFootid As Int = FindCurrFootIndex(headid)		
+				If currFootid = -1 Then
+					Return
+				End If
+				If currFootid < uiindex Then 
+					' The larger index do first	i.e. uiindex do first
+					LogIfIndexOutOfBound(450, uiindex)
+					clv1.ReplaceAt(prevFootId, pnlOFoot, 45dip, "F_" & oheadid)
 					clv1.RemoveAt(uiindex)
-				Else			
-					If nextheadid < uiindex Then ' The larger index do first
-						LogIfIndexOutOfBound(450, uiindex)
-						clv1.RemoveAt(uiindex)
-						LogIfIndexOutOfBound(452, nextheadid)
-						clv1.InsertAt(nextheadid, pnlLine, value)
-					Else
-						LogIfIndexOutOfBound(455, nextheadid)						
-						clv1.InsertAt(nextheadid, pnlLine, value)						
-						LogIfIndexOutOfBound(457, uiindex)
-						clv1.RemoveAt(uiindex)
-					End If					
+					LogIfIndexOutOfBound(452, currFootid)
+					clv1.ReplaceAt(currFootid, pnlFoot, 45dip, "F_" & headid)					
+					clv1.InsertAt(currFootid, pnlLine, value)
+				Else
+					' The larger index do first	i.e. currFootid do first
+					LogIfIndexOutOfBound(455, currFootid)						
+					clv1.ReplaceAt(currFootid, pnlFoot, 45dip, "F_" & headid)
+					clv1.InsertAt(currFootid, pnlLine, value)
+					LogIfIndexOutOfBound(457, uiindex)
+					clv1.ReplaceAt(prevFootId, pnlOFoot, 45dip, "F_" & oheadid)
+					clv1.RemoveAt(uiindex)						
 				End If				
 				clv1.Refresh
 				timer.Enabled = True
 				Wait For timer_tick
 				timer.Enabled = False
-				If nextheadid = -1 Or nextheadid = clv1.Size Then
-					nextheadid = clv1.Size - 1
+				If currFootid > clv1.Size -1 Then
+					currFootid = clv1.Size -1
 				End If
-				clv1.JumpToItem(nextheadid)
+				clv1.JumpToItem(currFootid)
 			Case 1 ' Transfer in, delete
 				Dim pnlLine_1 As B4XView = xui.CreatePanel("")
 				pnlLine_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
 				pnlLine_1.Tag = "Line"
 				'the lineid of value is kept and transfered
-				Dim originalLineid_1 As Int = UiindexToLineid(uiindex)
-				If originalLineid_1 = -1 Then
+				Dim OLineid_1 As Int = UiindexToLineid(uiindex)
+				If OLineid_1 = -1 Then
 					Return
 				End If
-				Dim value_1 As String =  $"L_${headid}_${originalLineid_1}"$
-				Dim nextheadid_1 As Int = FindNextHeadIndex(headid)
-				If nextheadid_1 = -1 Or nextheadid_1 = clv1.Size Then
-					'No next head
-					' Must add before delete
-					clv1.Add(pnlLine_1, value_1)
-					LogIfIndexOutOfBound(484, uiindex)
+					
+				Dim pnlFoot_1 As B4XView = xui.CreatePanel("")
+				pnlFoot_1.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot_1.Tag = "Footer"								
+				Dim value_1 As String =  $"L_${headid}_${OLineid_1}"$
+				Dim currFootid_1 As Int = FindCurrFootIndex(headid)				
+				If currFootid_1 = -1 Then
+					Return
+				End If
+				If currFootid_1 < uiindex Then 
+					' The larger index do first i.e. uiindex do first
+					LogIfIndexOutOfBound(490, uiindex+1)
+					clv1.RemoveAt(uiindex+1) ' remove foot
+					LogIfIndexOutOfBound(492, uiindex)
 					clv1.RemoveAt(uiindex) 	 ' remove line
-					LogIfIndexOutOfBound(486, uiindex-1)
+					LogIfIndexOutOfBound(494, uiindex-1)
 					clv1.RemoveAt(uiindex-1) ' remove head
+					LogIfIndexOutOfBound(496, currFootid_1)
+					clv1.ReplaceAt(currFootid_1, pnlFoot_1, 45dip, "F_" & headid)
+					clv1.InsertAt(currFootid_1, pnlLine_1, value_1)					
 				Else
-					If nextheadid_1 < uiindex Then ' The larger index do first
-						LogIfIndexOutOfBound(490, uiindex+1)
-						clv1.RemoveAt(uiindex+1) ' remove foot
-						LogIfIndexOutOfBound(492, uiindex)
-						clv1.RemoveAt(uiindex) 	 ' remove line
-						LogIfIndexOutOfBound(494, uiindex-1)
-						clv1.RemoveAt(uiindex-1) ' remove head
-						LogIfIndexOutOfBound(496, nextheadid_1)
-						clv1.InsertAt(nextheadid_1, pnlLine_1, value_1)
-					Else
-						LogIfIndexOutOfBound(499, nextheadid_1)
-						clv1.InsertAt(nextheadid_1, pnlLine_1, value_1)
-						LogIfIndexOutOfBound(501, uiindex+1)
-						clv1.RemoveAt(uiindex+1) ' remove foot
-						LogIfIndexOutOfBound(503, uiindex)
-						clv1.RemoveAt(uiindex) 	 ' remove line
-						LogIfIndexOutOfBound(505, uiindex-1)
-						clv1.RemoveAt(uiindex-1) ' remove head
-					End If
-				End If				
+					' The larger index do first i.e. currFootid do first
+					clv1.ReplaceAt(currFootid_1, pnlFoot_1, 45dip, "F_" & headid)
+					LogIfIndexOutOfBound(499, currFootid_1)
+					clv1.InsertAt(currFootid_1, pnlLine_1, value_1)
+					LogIfIndexOutOfBound(501, uiindex+1)
+					clv1.RemoveAt(uiindex+1) ' remove foot
+					LogIfIndexOutOfBound(503, uiindex)
+					clv1.RemoveAt(uiindex) 	 ' remove line
+					LogIfIndexOutOfBound(505, uiindex-1)
+					clv1.RemoveAt(uiindex-1) ' remove head						
+				End If			
 				clv1.Refresh
 				timer.Enabled = True
 				Wait For timer_tick
-				timer.Enabled = False
-				If nextheadid_1 = -1 Or nextheadid_1 >= clv1.Size Then
-					nextheadid_1 = clv1.Size -1
+				timer.Enabled = False		
+				If currFootid_1 > clv1.Size -1 Then
+					currFootid_1 = clv1.Size -1		
 				End If
-				clv1.JumpToItem(nextheadid_1)
+				clv1.JumpToItem(currFootid_1)
 			Case 2 ' insert, transfer out
 				Dim pnlHead_2 As B4XView = xui.CreatePanel("")
 				pnlHead_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead_2.SetBitmap(bmHeader)
+				pnlHead_2.SetBitmap(bmHeader)
 				pnlHead_2.Tag = "Header"
+				Dim pnlLine_2 As B4XView = xui.CreatePanel("")
+				pnlLine_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
+				pnlLine_2.Tag = "Line"
+				Dim pnlFoot_2 As B4XView = xui.CreatePanel("")
+				pnlFoot_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot_2.SetBitmap(bmFooter)
+				pnlFoot_2.Tag = "Footer"
+				Dim pnlOFoot_2 As B4XView = xui.CreatePanel("")
+				pnlOFoot_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlOFoot_2.SetBitmap(bmFooter)
+				pnlOFoot_2.Tag = "Footer"
 				'the lineid of value is kept and transfered
-				Dim originalLineid_2 As Int = UiindexToLineid(uiindex)
-				If originalLineid_2 = -1 Then
+				Dim OLineid_2 As Int = UiindexToLineid(uiindex)
+				If OLineid_2 = -1 Then
 					Return
 				End If
 				' Must add before delete
-				Dim value_2 As String = $"L_${headid}_${originalLineid_2}"$
-				clv1.Add(pnlHead_2, "H_" & headid)
-				Dim pnlLine_2 As B4XView = xui.CreatePanel("")
-				pnlLine_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
-				pnlLine_2.Tag = "Line"				
-				clv1.Add(pnlLine_2, value_2)				
-				Dim pnlFoot_2 As B4XView = xui.CreatePanel("")
-				pnlFoot_2.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlFoot_2.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
-				pnlFoot_2.SetBitmap(bmFooter)
-				pnlFoot_2.Tag = "Footer"
-				clv1.Add(pnlFoot_2, "F_" & headid)				
-				
-				LogIfIndexOutOfBound(540, uiindex)
+				Dim value_2 As String = $"L_${headid}_${OLineid_2}"$
+				Dim prevFootId_2 As Int = FindCurrFootIndex(oheadid)
+				clv1.Add(pnlHead_2, "H_" & headid)				
+				clv1.Add(pnlLine_2, value_2)
+				clv1.Add(pnlFoot_2, "F_" & headid)								
+				LogIfIndexOutOfBound(540, uiindex)								
+				clv1.ReplaceAt(prevFootId_2, pnlOFoot_2, 45dip, "F_" & oheadid)
 				clv1.RemoveAt(uiindex) 	 ' remove line				
-				
 				timer.Enabled = True
 				Wait For timer_tick
 				timer.Enabled = False
@@ -626,40 +667,37 @@ Private Sub ExchangedHandler(i_mapRes As Map)
 			Case 3 ' insert, delete
 				Dim pnlHead_3 As B4XView = xui.CreatePanel("")
 				pnlHead_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlHead_3.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Yellow, 20dip)
-				'pnlHead_3.SetBitmap(bmHeader)
+				pnlHead_3.SetBitmap(bmHeader)
 				pnlHead_3.Tag = "Header"
+				Dim pnlLine_3 As B4XView = xui.CreatePanel("")
+				pnlLine_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
+				pnlLine_3.Tag = "Line"
+				Dim pnlFoot_3 As B4XView = xui.CreatePanel("")
+				pnlFoot_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
+				pnlFoot_3.SetBitmap(bmFooter)
+				pnlFoot_3.Tag = "Footer"
 				'the lineid of value is kept and transfered
-				Dim originalLineid_3 As Int = UiindexToLineid(uiindex)
-				If originalLineid_3 = -1 Then
+				Dim OLineid_3 As Int = UiindexToLineid(uiindex)
+				If OLineid_3 = -1 Then
 					Return
 				End If
 				' Must add before delete
-				Dim value_3 As String = $"L_${headid}_${originalLineid_3}"$
-				clv1.Add(pnlHead_3, "H_" & headid)
-				Dim pnlLine_3 As B4XView = xui.CreatePanel("")
-				pnlLine_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 40dip)
-				pnlLine_3.Tag = "Line"				
-				clv1.Add(pnlLine_3, value_3)				
-				Dim pnlFoot_3 As B4XView = xui.CreatePanel("")
-				pnlFoot_3.SetLayoutAnimated(0, 0, 0, clv1.AsView.Width, 45dip)
-				'pnlFoot_3.SetColorAndBorder(Colors.DarkGray, 3dip, Colors.Green, 20dip)
-				pnlFoot_3.SetBitmap(bmFooter)
-				pnlFoot_3.Tag = "Footer"
+				Dim value_3 As String = $"L_${headid}_${OLineid_3}"$
+				clv1.Add(pnlHead_3, "H_" & headid)								
+				clv1.Add(pnlLine_3, value_3)
 				clv1.Add(pnlFoot_3, "F_" & headid)				
 				LogIfIndexOutOfBound(569, uiindex+1)
 				clv1.RemoveAt(uiindex+1) ' remove foot
 				LogIfIndexOutOfBound(571, uiindex)
 				clv1.RemoveAt(uiindex) 	 ' remove line
 				LogIfIndexOutOfBound(573, uiindex-1)
-				clv1.RemoveAt(uiindex-1) ' remove head
-				
+				clv1.RemoveAt(uiindex-1) ' remove head				
 				timer.Enabled = True
 				Wait For timer_tick
 				timer.Enabled = False
 				clv1.JumpToItem(clv1.Size-1)
 			Case Else
-					
+				Return	
 		End Select
 	Catch
 		Dim errmsg As String = "ExchangedHandler: " & LastException.Message
@@ -677,7 +715,8 @@ Private Sub UiindexToLineid(uiindex As Int) As Int
 	Return arr(2)
 End Sub
 
-Private Sub FindNextHeadIndex(headid As Int) As Int
+' return index of current block's footer by giving headid
+Private Sub FindCurrFootIndex(headid As Int) As Int
 	Dim idx_1 As Int = -1
 	Dim i As Int = 0
 	For i = 0 To clv1.Size-1
@@ -694,10 +733,7 @@ Private Sub FindNextHeadIndex(headid As Int) As Int
 	For j = idx_1 + 1 To clv1.Size -1
 		Dim tempvalue As String = clv1.GetValue(j)
 		If tempvalue.SubString2(0, 1) = "F" Then
-			idx_2 = j
-			If idx_2 >= clv1.Size Then
-				LogColor("headid: " & headid, Colors.Red)
-			End If
+			idx_2 = j			
 			Exit
 		End If
 	Next
@@ -836,9 +872,10 @@ Private Sub clv1_VisibleRangeChanged (FirstIndex As Int, LastIndex As Int)
 							EquipHeaderPanel(pnl_1, "HEADER #" & valOne & " " & myTitle, isExpanded)
 							If isExpanded Then
 								' Refresh the Footer when expanded
-								Dim itsfootid As Int = FindNextHeadIndex(valOne)
+								Dim itsfootid As Int = FindCurrFootIndex(valOne)
 								Dim pnl_footer As B4XView = clv1.GetPanel(itsfootid)
-								EquipFooterPanel(pnl_footer, "FOOTER #" & valOne)
+								Dim summary As String = $"Count: ${objMapOfList.mapCount.get(valOne)}; Sum: ${objMapOfList.mapSum.get(valOne)}"$
+								EquipFooterPanel(pnl_footer, "FOOTER #" & valOne & "; " & summary)
 							End If
 						End If						
 					Case "L"						
@@ -851,9 +888,8 @@ Private Sub clv1_VisibleRangeChanged (FirstIndex As Int, LastIndex As Int)
 						End If		
 					Case "F"
 						If objMapOfList.mapHeader.ContainsKey(valOne) Then
-							'Dim mapEntry3 As Map = objMapOfList.mapHeader.Get(valOne)
-							'Dim myTitle As String = mapEntry3.Get("text")							
-							EquipFooterPanel(pnl_1, "FOOTER #" & valOne)
+							Dim summary_1 As String = $"Count: ${objMapOfList.mapCount.get(valOne)}; Sum: ${objMapOfList.mapSum.get(valOne)}"$
+							EquipFooterPanel(pnl_1, "FOOTER #" & valOne & "; " & summary_1)
 						End If
 					Case Else
 						Continue
@@ -947,6 +983,7 @@ Sub EquipFooterPanel(pFooter As B4XView, Text As String)
 	lbl.TextColor = Colors.White	
 	Dim lbl1 As Label : lbl1.Initialize("")
 	lbl1.Gravity = Bit.Or(Gravity.CENTER_VERTICAL, Gravity.RIGHT)
+	pFooter.RemoveAllViews
 	pFooter.AddView(lbl, 5dip, 2dip, 320dip, 45dip)
 	pFooter.AddView(lbl1, 280dip, 2dip, 20dip, 45dip)
 End Sub

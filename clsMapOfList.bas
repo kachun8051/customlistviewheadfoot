@@ -9,6 +9,10 @@ Sub Class_Globals
 	Public mapOne As Map '{headerid: [lineid#1, lineid#2, lineid#3, ...]}
 	'Contents - map of header to its content
 	Public mapHeader As Map 'ignore '{headerid: {text: text1}}
+	'Summary - map of header to its sum
+	Public mapSum As Map '{headerid: sum}
+	'Summary - map of header of its count
+	Public mapCount As Map '{headerid: count}	
 	'Contents - map of line to its content
 	Public mapLine As Map 'ignore '{lineid: [{text: text1, qty: qty1}, {text: text2, qty: qty2}, {text: text3, qty: qty3}, ...]}
 	'Hide or Show
@@ -26,6 +30,8 @@ Public Sub Initialize(callback As Object, event As String)
 	mapHeader.Initialize
 	mapLine.Initialize
 	mapShow.Initialize
+	mapSum.Initialize
+	mapCount.Initialize
 	m_callback = callback
 	m_event = event
 	m_uiindex = -1
@@ -48,6 +54,12 @@ Public Sub ClearAll()
 	End If
 	If mapLine.IsInitialized Then
 		mapLine.Clear
+	End If
+	If mapSum.IsInitialized Then
+		mapSum.clear
+	End If
+	If mapCount.IsInitialized Then
+		mapCount.clear
 	End If
 	If mapShow.IsInitialized Then
 		mapShow.Clear
@@ -136,17 +148,18 @@ Public Sub exchangeLine(i_oheadid As Int, i_headText As String, i_lineid As Int,
 	Dim isHeadDeleted As Boolean = False
 	' Target
 	Dim headid As Int = getHeadIdByText(i_headText)
-'	Dim targetcount As Int = 0
 	If headid = -1 Then
 		' Create New head
 		isHeadCreated = True		
 		Dim maxheadkey As Int = getMaxKeyInMap(mapHeader)
 		headid = maxheadkey + 1
-		mapHeader.Put(headid, CreateMap("text": i_headText))
+		mapHeader.Put(headid, CreateMap("text": i_headText))		
 		mapShow.Put(headid, 1)
 		Dim lst As List : lst.Initialize
 		lst.Add(i_lineid)
 		mapOne.Put(headid, lst)
+		mapSum.Put(headid, getHeaderSum(headid))
+		mapCount.Put(headid, 1)
 '		targetcount = 1
 	Else
 		isHeadCreated = False
@@ -155,7 +168,8 @@ Public Sub exchangeLine(i_oheadid As Int, i_headText As String, i_lineid As Int,
 			Return False
 		End If
 		lstTarget.Add(i_lineid)
-'		targetcount = lstTarget.Size
+		mapSum.Put(headid, getHeaderSum(headid))
+		mapCount.Put(headid, getHeaderCount(headid))
 	End If
 	' Source
 	Dim lstSource As List = mapOne.Get(i_oheadid)	
@@ -172,9 +186,13 @@ Public Sub exchangeLine(i_oheadid As Int, i_headText As String, i_lineid As Int,
 		mapHeader.Remove(i_oheadid)
 		mapShow.Remove(i_oheadid)
 		mapOne.Remove(i_oheadid)
+		mapSum.Remove(i_oheadid)
+		mapCount.Remove(i_oheadid)
 	Else
 		isHeadDeleted = False
 		lstSource.RemoveAt(foundidx)
+		mapSum.Put(i_oheadid, getHeaderSum(i_oheadid))
+		mapCount.Put(i_oheadid, getHeaderCount(i_oheadid))
 	End If		
 	'lstTarget.Add(i_lineid)
 	If SubExists(m_callback, m_event) Then		
@@ -182,7 +200,7 @@ Public Sub exchangeLine(i_oheadid As Int, i_headText As String, i_lineid As Int,
 			CreateMap("action": "exchanged", _ 
 				"isheadcreated": isHeadCreated, "isheaddeleted": isHeadDeleted, _ 
 				"status": getStatus(isHeadCreated, isHeadDeleted), _ 
-				"uiindex": i_ui, "headid": headid))
+				"uiindex": i_ui, "headid": headid, "oheadid": i_oheadid))
 	End If
 	Return True
 End Sub
@@ -257,9 +275,13 @@ Public Sub FillTheMap2() As Boolean
 					CreateMap("item": mapEntry.Get("item"), "qty": mapEntry.Get("qty")))
 				lst.Add(mapEntry.Get("id"))
 			Next
-			mapHeader.Put(intKey, innerMap.Get("head"))
+			mapHeader.Put(intKey, innerMap.Get("head"))			
 			mapShow.Put(intKey, 1)
 			mapOne.Put(intKey, lst)
+			Dim qty_1 As Int = getHeaderSum(intKey)
+			Dim count_1 As Int = getHeaderCount(intKey)
+			mapSum.Put(intKey, qty_1)
+			mapCount.Put(intKey, count_1)
 		Next
 		'LogStructure("mapOne", mapOne)
 		'LogStructure("mapHeader", mapHeader)
@@ -291,6 +313,10 @@ Public Sub AddItem(i_map As Map) As Boolean
 			Dim maxheadkey As Int = getMaxKeyInMap(mapHeader)
 			Dim maxlinekey As Int = getMaxKeyInMap(mapLine)
 			mapHeader.Put(maxheadkey + 1, i_map.Get("head"))
+			Dim innermap As Map = i_map.Get("line")
+			Dim qty As Int = innermap.Get("qty")
+			mapSum.Put(maxheadkey + 1, qty)
+			mapCount.Put(maxheadkey + 1, 1)
 			mapShow.Put(maxheadkey + 1, 1)
 			mapLine.Put(maxlinekey + 1, i_map.Get("line"))
 			Dim lst As List : lst.Initialize
@@ -304,9 +330,14 @@ Public Sub AddItem(i_map As Map) As Boolean
 			'existing head
 			'mapHeader no need to update
 			Dim maxlinekey_1 As Int = getMaxKeyInMap(mapLine)
-			mapLine.Put(maxlinekey_1 + 1, i_map.Get("line"))
+			mapLine.Put(maxlinekey_1 + 1, i_map.Get("line"))			
 			Dim lst_1 As List = mapOne.Get(foundId)
 			lst_1.Add(maxlinekey_1 + 1)
+			Dim innermap As Map = i_map.Get("line")
+			Dim qty_1 As Int = getHeaderSum(foundId)
+			Dim count_1 As Int = getHeaderCount(foundId)
+			mapSum.Put(foundId, qty_1)
+			mapCount.Put(foundId, count_1)			
 			If SubExists(m_callback, m_event) Then
 				CallSubDelayed2(m_callback, m_event, _ 
 					CreateMap("action": "lineadded", "headid": foundId, "lineid": (maxlinekey_1 + 1)))
@@ -353,14 +384,13 @@ Public Sub EditLine(i_map As Map) As Boolean
 	If i_map.ContainsKey("line") Then
 		Dim mapEntry As Map = i_map.Get("line")
 		Dim lineid As Int = mapEntry.Get("lineid")
-		Dim headid As Int = mapEntry.Get("headid") 'getHeadIdFromLineId(lineid)
-'		If headid = -1 Then
-'			Return False
-'		End If
+		Dim headid As Int = mapEntry.Get("headid") 
 		Dim innerMap As Map = mapLine.Get(lineid)		
 		innerMap.Put("item", mapEntry.Get("item"))
-		innerMap.Put("qty", mapEntry.Get("qty"))
-				
+		innerMap.Put("qty", mapEntry.Get("qty"))	
+		Dim qty As Int = getHeaderSum(headid)
+		'Dim count As Int = getHeaderCount(headid)
+		mapSum.Put(headid, qty)
 		If SubExists(m_callback, m_event) Then
 			CallSubDelayed2(m_callback, m_event, _
 				CreateMap("action": "lineedited", "uiindex": m_uiindex, "headid": headid, "lineid": lineid))	
@@ -400,6 +430,38 @@ Private Sub getMaxKeyInMap(whichmap As Map) As Int
 	Return maxkey
 End Sub
 
+Private Sub getHeaderSum(headid As Int) As Int
+	If mapOne.ContainsKey(headid) = False Then
+		Return -1
+	End If
+	Dim lst As List = mapOne.Get(headid)
+	Dim sum As Int = 0
+	For Each line As Int In lst
+		If mapLine.ContainsKey(line) = False Then
+			Continue
+		End If
+		Dim innerMap As Map = mapLine.Get(line)
+		Dim qty As Int = innerMap.Get("qty")
+		sum = sum + qty
+	Next
+	Return sum
+End Sub
+
+Private Sub getHeaderCount(headid As Int) As Int
+	If mapOne.ContainsKey(headid) = False Then
+		Return -1
+	End If
+	Dim lst As List = mapOne.Get(headid)
+	Dim count As Int = 0 
+	For Each line As Int In lst
+		If mapLine.ContainsKey(line) = False Then
+			Continue
+		End If
+		count = count + 1
+	Next
+	Return count
+End Sub
+
 Public Sub DeleteHeader(headid As Int) As Boolean
 	If mapOne.ContainsKey(headid) = False Or mapHeader.ContainsKey(headid) = False Then		
 		Return False
@@ -413,9 +475,11 @@ Public Sub DeleteHeader(headid As Int) As Boolean
 			mapLine.Remove(id_1)
 		End If		
 	Next
+	mapSum.Remove(headid)
+	mapCount.Remove(headid)
 	mapHeader.Remove(headid)
 	mapShow.Remove(headid)
-	mapOne.Remove(headid)	
+	mapOne.Remove(headid)		
 	If SubExists(m_callback, m_event) Then
 		CallSubDelayed2(m_callback, m_event, _ 
 			CreateMap("action": "headdeleted", "uiindex": m_uiindex, "count": lstTmp.Size))
@@ -445,20 +509,24 @@ Public Sub DeleteItem(headid As Int, lineid As Int) As Boolean
 			mapLine.Remove(lstTmp.Get(0))
 		End If
 		mapHeader.Remove(headid)
+		mapSum.Remove(headid)
+		mapCount.Remove(headid)
 		mapShow.Remove(headid)
 		mapOne.Remove(headid)
 		If SubExists(m_callback, m_event) Then
 			CallSubDelayed2(m_callback, m_event, _ 
-				CreateMap("action": "headdeleted", "uiindex": m_uiindex-1, "count": 1))
+				CreateMap("action": "headdeleted", "uiindex": m_uiindex-1, "headid": headid, "count": 1))
 		End If
 	Else
 		If mapLine.ContainsKey(lineid) Then
 			mapLine.Remove(lineid)
-		End If
+		End If		
 		lstTmp.RemoveAt(foundidx)
+		mapSum.Put(headid, getHeaderSum(headid))
+		mapCount.Put(headid, getHeaderCount(headid))
 		If SubExists(m_callback, m_event) Then
 			CallSubDelayed2(m_callback, m_event, _ 
-				CreateMap("action": "linedeleted", "uiindex": m_uiindex))
+				CreateMap("action": "linedeleted", "uiindex": m_uiindex, "headid": headid))
 		End If
 	End If
 	'LogStructure
